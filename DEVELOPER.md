@@ -44,6 +44,8 @@ window.CarbonChat.init({
 | `modelId` | `string` | Optional model ID to use for the interaction. |
 | `onLoad` | `() => any` | Executed on mount. Can return data used as initial context. |
 | `onPreSendMessage` | `(msg: string) => string \| null` | Hook to process/modify messages. Return `null` to abort sending. |
+| `onPostSendMessage`| `(userMsg, aiMsg) => void` | Callback after message exchange completes. |
+| `onDocumentUpload` | `() => void` | Callback when the document upload button is clicked. |
 | `onMicrophoneClick`| `() => void` | Callback when the microphone button is clicked. |
 | `theme`            | `object`     | Object to override default CSS variables. |
 
