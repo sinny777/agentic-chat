@@ -1,0 +1,5 @@
+{
+  "name": "Carbon AI Chat Widget",
+  "description": "An embeddable, Carbon Design System inspired AI chat widget featuring streaming responses, tool calling visualization, and agentic reasoning displays using the Gemini API.",
+  "requestFramePermissions": []
+}
