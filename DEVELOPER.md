@@ -81,3 +81,75 @@ If you prefer to use CSS, you can override the variables directly in your styles
   --carbon-chat-font-family: 'Inter', sans-serif;
 }
 ```
+
+## Framework Integration
+
+The Carbon Chat Widget can be easily integrated into Modern single-page applications (SPAs).
+
+### React Integration
+
+In a React application, it's best to wrap the initialization in a `useEffect` hook. This ensures the widget is mounted correctly and cleaned up if needed.
+
+```tsx
+import React, { useEffect } from 'react';
+
+const ChatWidget = () => {
+  useEffect(() => {
+    // 1. Ensure global stub is present (if loaded via script tag)
+    // Or you can directly use window.CarbonChat if defined
+    if (window.CarbonChat) {
+      window.CarbonChat.init({
+        apiEndpoint: 'http://localhost:8000/chat/completions',
+        onLoad: () => console.log('Widget Ready'),
+        theme: {
+          primaryColor: '#0062ff'
+        }
+      });
+    }
+  }, []);
+
+  return null; // The widget mounts itself to document.body
+};
+
+export default ChatWidget;
+```
+
+### Angular Integration
+
+In Angular, you can initialize the widget within the `ngOnInit` lifecycle hook of a core component (e.g., `AppComponent`).
+
+```typescript
+import { Component, OnInit } from '@angular/core';
+
+// Tell TypeScript about the global CarbonChat object
+declare global {
+  interface Window {
+    CarbonChat: any;
+  }
+}
+
+@Component({
+  selector: 'app-root',
+  template: '<router-outlet></router-outlet>'
+})
+export class AppComponent implements OnInit {
+  ngOnInit() {
+    if (window.CarbonChat) {
+      window.CarbonChat.init({
+        apiEndpoint: 'http://localhost:8000/chat/completions',
+        onDocumentUpload: () => this.handleUpload(),
+        theme: {
+          fontFamily: 'Roboto, sans-serif'
+        }
+      });
+    }
+  }
+
+  handleUpload() {
+    console.log('Document upload requested from Angular');
+  }
+}
+```
+
+> [!TIP]
+> Make sure to include the widget's JS and CSS files in your `angular.json` scripts/styles arrays or via `<script>` tags in `index.html`.

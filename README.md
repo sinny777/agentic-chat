@@ -21,11 +21,9 @@ A premium, state-of-the-art Agentic AI conversational chat widget built with **R
 - **Dynamic Animations**: Smooth transitions and sleek micro-animations for a premium feel.
 
 ### 🛠 Developer-First Customization
-- **Flexible Hooks**:
-  - `onLoad`: Custom initialization logic.
-  - `onPreSendMessage`: Intercept and modify messages before they hit the AI.
-  - `onPostSendMessage`: Callback after the full AI response is received.
-- **Media Extensions**: Dedicated hooks for `onDocumentUpload` and `onMicrophoneClick`.
+- **Flexible Hooks**: `onLoad`, `onPreSendMessage`, `onPostSendMessage`, etc.
+- **Media Extensions**: Hooks for `onDocumentUpload` and `onMicrophoneClick`.
+- **Framework Support**: Seamless integration with **React**, **Angular**, and **Vue**.
 - **Theme Support**: Runtime styling customization via a simple `theme` object.
 - **CSS Overrides**: Fine-grained control using exposed CSS variables.
 
