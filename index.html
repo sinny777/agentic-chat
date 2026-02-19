@@ -28,6 +28,62 @@
 <body>
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
+
+  <!-- 
+    Carbon Chat Embeddable Initialization Snippet
+    Use this pattern in your hosting application to ensure robust loading.
+  -->
+  <script>
+    /*
+    // 1. Define the Stub/Queue (prevents "window.CarbonChat undefined" errors)
+    window.CarbonChat = window.CarbonChat || {
+      _q: [],
+      init: function (cfg) { this._q.push(['init', cfg]); }
+    };
+
+    // 2. Call Initialization with your custom configuration
+    window.CarbonChat.init({
+      apiEndpoint: 'http://localhost:8000/chat/completions', // Set your backend URL
+      
+      // Hook: Called when the widget mounting is complete
+      onLoad: async () => {
+        console.log("Chat widget loaded and ready");
+        // return { user_context: 'example' }; // Optional: return metadata for the agent
+      },
+
+      // Hook: Intercept, modify, or block messages before they are sent to AI
+      onPreSendMessage: async (message) => {
+        console.log("About to send message:", message);
+        // return null; // Return null to block the message
+        return message; // Return the string to be sent
+      },
+
+      // Hook: Triggered after the AI agent has finished its response
+      onPostSendMessage: (userMessage, aiResponse) => {
+        console.log("Message exchange completed");
+        console.log("AI Response content:", aiResponse.content);
+      },
+
+      // Hook: Called when the document upload button is clicked
+      onDocumentUpload: () => {
+        console.log("Document upload button clicked - implement your picker here");
+      },
+
+      // Hook: Called when the microphone button is clicked
+      onMicrophoneClick: () => {
+        console.log("Microphone button clicked - implement your voice logic here");
+      },
+
+      // Theme: Customize the widget appearance
+      theme: {
+        primaryColor: '#0062ff',
+        headerBackground: '#161616',
+        headerText: '#ffffff',
+        fontFamily: '"IBM Plex Sans", sans-serif'
+      }
+    });
+    */
+  </script>
 </body>
 
 </html>

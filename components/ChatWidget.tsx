@@ -7,7 +7,12 @@ import {
   Settings,
   Code,
   ChevronDown,
-  Renew
+  Renew,
+  Upload,
+  Microphone,
+  ThumbsUp,
+  ThumbsDown,
+  Copy
 } from '@carbon/icons-react';
 import { Button, TextInput, IconButton, Theme } from '@carbon/react';
 import MarkdownRenderer from './MarkdownRenderer';
@@ -16,9 +21,19 @@ import { Message, MessageType, Sender } from '../types';
 
 interface ChatWidgetProps {
   onLoad?: () => Promise<any> | any;
+  onPreSendMessage?: (input: string) => Promise<string | null> | string | null;
+  onPostSendMessage?: (userMessage: Message, aiResponse: Message) => void;
+  onDocumentUpload?: () => void;
+  onMicrophoneClick?: () => void;
 }
 
-const ChatWidget: React.FC<ChatWidgetProps> = ({ onLoad }) => {
+const ChatWidget: React.FC<ChatWidgetProps> = ({
+  onLoad,
+  onPreSendMessage,
+  onPostSendMessage,
+  onDocumentUpload,
+  onMicrophoneClick
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -134,17 +149,27 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onLoad }) => {
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return;
 
+    let processedInput = input;
+    if (onPreSendMessage) {
+      const result = await onPreSendMessage(input);
+      if (result === null) return;
+      processedInput = result;
+    }
+
     const userMsg: Message = {
       id: Date.now().toString(),
       sender: Sender.USER,
       type: MessageType.TEXT,
-      content: input,
+      content: processedInput,
       timestamp: Date.now()
     };
 
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+
+    let fullAiResponse = "";
+    let finalAiMsg: Message | null = null;
 
     try {
       const stream = agentService.streamChat(messages, input);
@@ -175,15 +200,26 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onLoad }) => {
           // Case 3: New message (Streaming or Discrete) - either type changed or discrete event
           // If the previous message was streaming, mark it as finished
           if (lastMsg && lastMsg.isStreaming) {
+            const updatedLast = { ...lastMsg, isStreaming: false };
+            finalAiMsg = chunk;
             return [
               ...prev.slice(0, -1),
-              { ...lastMsg, isStreaming: false },
+              updatedLast,
               chunk
             ];
           }
 
+          finalAiMsg = chunk;
           return [...prev, chunk];
         });
+
+        if (chunk.type === MessageType.TEXT) {
+          fullAiResponse += chunk.content;
+        }
+      }
+
+      if (onPostSendMessage && finalAiMsg) {
+        onPostSendMessage(userMsg, finalAiMsg);
       }
     } catch (error) {
       console.error("Chat error:", error);
@@ -218,7 +254,7 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onLoad }) => {
               <Bot size={20} />
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Agent Assistant</span>
-                <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Powered by BeeAI</span>
+                {/* <span style={{ fontSize: '0.75rem', opacity: 0.8 }}>Powered by IBM</span> */}
               </div>
             </div>
             <div style={{ display: 'flex' }}>
@@ -263,7 +299,15 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onLoad }) => {
 
           {/* Input Area */}
           <div className="carbon-chat-input-area">
-            <div style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+            <IconButton
+              renderIcon={Upload}
+              kind="ghost"
+              label="Upload documents"
+              size="lg"
+              disabled={isLoading}
+              onClick={onDocumentUpload}
+            />
+            <div className="chat-input-wrapper">
               <TextInput
                 id="chat-input"
                 labelText=""
@@ -274,24 +318,30 @@ const ChatWidget: React.FC<ChatWidgetProps> = ({ onLoad }) => {
                 disabled={isLoading}
                 hideLabel
                 size="lg"
-                style={{ border: 'none', boxShadow: 'none' }}
               />
-              <Button
-                hasIconOnly
-                renderIcon={Send}
+              <IconButton
+                renderIcon={Microphone}
                 kind="ghost"
-                iconDescription="Send"
-                disabled={!input.trim() || isLoading}
-                onClick={handleSendMessage}
+                label="Voice input"
+                size="lg"
+                disabled={isLoading}
+                onClick={onMicrophoneClick}
               />
             </div>
-
+            <IconButton
+              renderIcon={Send}
+              kind="ghost"
+              label="Send"
+              disabled={!input.trim() || isLoading}
+              onClick={handleSendMessage}
+              size="lg"
+            />
           </div>
 
           {/* Footer Branding */}
-          <div style={{ padding: '0.25rem', textAlign: 'center', backgroundColor: '#f4f4f4', fontSize: '0.625rem', color: '#6f6f6f' }}>
+          {/* <div style={{ padding: '0.25rem', textAlign: 'center', backgroundColor: '#f4f4f4', fontSize: '0.625rem', color: '#6f6f6f' }}>
             IBM Carbon Design System • Agentic AI
-          </div>
+          </div> */}
         </div>
       )}
 
@@ -342,7 +392,33 @@ const MessageBubble: React.FC<{ message: Message }> = ({ message }) => {
         {isUser ? (
           <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{message.content}</p>
         ) : (
-          <MarkdownRenderer content={message.content} />
+          <>
+            <MarkdownRenderer content={message.content} />
+            <div className="carbon-chat-message-actions">
+              <IconButton
+                renderIcon={ThumbsUp}
+                kind="ghost"
+                label="Helpful"
+                size="sm"
+                className="feedback-btn"
+              />
+              <IconButton
+                renderIcon={ThumbsDown}
+                kind="ghost"
+                label="Not helpful"
+                size="sm"
+                className="feedback-btn"
+              />
+              <IconButton
+                renderIcon={Copy}
+                kind="ghost"
+                label="Copy to clipboard"
+                size="sm"
+                className="feedback-btn"
+                onClick={() => navigator.clipboard.writeText(message.content)}
+              />
+            </div>
+          </>
         )}
       </div>
     </div>

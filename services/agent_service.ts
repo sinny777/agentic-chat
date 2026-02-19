@@ -8,10 +8,16 @@ const MODEL_ID = 'meta-llama/llama-4-maverick-17b-128e-instruct-fp8';
 const USE_MOCK_DATA = false;
 
 export class AgentService {
-  private threadId: string;
+  private apiEndpoint: string = 'http://localhost:8080/chat/completions';
+  private modelId: string = 'meta-llama/llama-4-maverick-17b-128e-instruct-fp8';
 
   constructor() {
     this.threadId = crypto.randomUUID();
+  }
+
+  public setConfig(config: { apiEndpoint?: string; modelId?: string }) {
+    if (config.apiEndpoint) this.apiEndpoint = config.apiEndpoint;
+    if (config.modelId) this.modelId = config.modelId;
   }
 
   private mapHistoryToApiMessages(history: Message[]) {
@@ -188,7 +194,7 @@ export class AgentService {
     apiMessages.push({ role: 'user', content: newMessage });
 
     try {
-      const response = await fetch(API_ENDPOINT, {
+      const response = await fetch(this.apiEndpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +202,7 @@ export class AgentService {
           'X-API-Key': '7a3B#dK9L2pM4nR5t6U7vW8xY9z0A1B2C3D4E5F6G7H8I9J0'
         },
         body: JSON.stringify({
-          model: MODEL_ID,
+          model: this.modelId,
           context: context,
           messages: apiMessages,
           stream: true,
